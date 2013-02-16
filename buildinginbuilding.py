@@ -1,52 +1,29 @@
 from javax.swing import JOptionPane, JDialog
 from java.awt.event import ActionListener, ActionEvent
-from org.openstreetmap.josm import Main
-import org.openstreetmap.josm.command as Command
-import org.openstreetmap.josm.data.osm.Node as Node
-import org.openstreetmap.josm.data.osm.Way as Way
-import org.openstreetmap.josm.data.osm.TagCollection as TagCollection
-import org.openstreetmap.josm.data.osm.DataSet as DataSet
-import time
-from org.openstreetmap.josm.tools.I18n.tr import *
 from java.util import Collection
 from java.util import HashSet
 from java.util import LinkedList;
 from java.util import List;
 from java.util import Set;
+
+import time
+
+from org.openstreetmap.josm import Main
 from org.openstreetmap.josm.data.osm import *;
-# from org.openstreetmap.josm.data.osm import OsmPrimitive;
-# import org.openstreetmap.josm.data.osm.OsmPrimitiveType;
-# import org.openstreetmap.josm.data.osm.QuadBuckets;
-# import org.openstreetmap.josm.data.osm.Relation;
-# import org.openstreetmap.josm.data.osm.RelationMember;
-# import org.openstreetmap.josm.data.osm.Way;
 from org.openstreetmap.josm.data.validation import *;
 from org.openstreetmap.josm.tools import *;
-from org.openstreetmap.josm.tools import *;
+from org.openstreetmap.josm.tools.I18n.tr import *
+import org.openstreetmap.josm.Main as Main
+import org.openstreetmap.josm.command as Command
+import org.openstreetmap.josm.data.osm.DataSet as DataSet
+import org.openstreetmap.josm.data.osm.Node as Node
+import org.openstreetmap.josm.data.osm.TagCollection as TagCollection
+import org.openstreetmap.josm.data.osm.Way as Way
 
-#            outers = FilteredCollection(index.search(p.getBBox()),  Predicate() :
+
+from list import JyLog;
  
-# class myFilteredCollect :
-#     def evaluateNode(n, obj) :
-#         x =isInPolygon(n, object.getNodes())
-#         if (x):
-#             return x
-#         x = object.getNodes().contains(n);
-#         if (x):
-#             return x
-#     def evaluateWay(w, obj) :
-#         if (w.equals(object)) :
-#             return false;                 
-#     def evaluate(Way object) {
-#         if p.equals(object):
-#             return false;
-#         else if (p instanceof Node):
-#             return evaluateNode((Node) p, object);
-#         else if (p instanceof Way):
-#             return evaluateWay((Way) p, object);
-#         else if (p instanceof Relation) :
-#             return evaluateRelation((Relation) p, object);
-#         return false;
+l=JyLog()
 
 def isBuilding(p):
     v = p.get("building");
@@ -68,7 +45,12 @@ class BuildingInBuilding :
 
     def visitn(self,n) :
         if (n.isUsable() and isBuilding(n)) :
-            self.primitivesToCheck.add(n);
+            if not self.primitivesToCheck.contains(n):
+#                print "adding  :"  n 
+                self.primitivesToCheck.add(n);
+            else:
+                print "duplicate p :" 
+                print n
 
     def visitw(self,w) :
         if (w.isUsable() and w.isClosed() and isBuilding(w)):
@@ -92,13 +74,23 @@ class BuildingInBuilding :
     
  
     def endTest(self) :
+        print "end"
         for p in self.primitivesToCheck :
-            print p
-    #     super.endTest();
+            collection = index.search(p.getBBox())
+            
+            # if (p.equals(object))
+            #             return false;
+            #         else if (p instanceof Node)
+            #             return evaluateNode((Node) p, object);
+            #         else if (p instanceof Way)
+            #             return evaluateWay((Way) p, object);
+            #         else if (p instanceof Relation)
+            #             return evaluateRelation((Relation) p, object);
+            #         return false;
+                
 
 
-
-
+                
 def main():
     b=BuildingInBuilding()
 
@@ -106,7 +98,8 @@ def main():
         mv= Main.main.map.mapView
         print mv.editLayer
 
-        if mv.editLayer and mv.editLayer.data:
+        if mv.editLayer and mv.editLayer.data :
+            selectedNodes = mv.editLayer.data.getSelectedNodes()
             selectedWays = mv.editLayer.data.getSelectedWays()
             if not(selectedWays):
                 JOptionPane.showMessageDialog(Main.parent, "Please select a set of ways")
@@ -119,9 +112,16 @@ def main():
                     if(housenumber):
                          b.visitw(way)
         #                print 'house box:', street, housenumber
+
+                for node in selectedNodes:
+                    housenumber=node.get('addr:housenumber')
+                    street=node.get('addr:street')
+                    if(housenumber):
+                         b.visitn(node)
+                         l.showNode(node)
+        #                print 'house box:', street, housenumber
         
 
         b.endTest()
-        
 
-main()
+#main()
