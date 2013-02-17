@@ -45,7 +45,7 @@ class ObjectTableModel(AbstractTableModel):
         return len(self.__columns__)
     def getRowCount(self):
         n= len(self.delegate)
-        print "row count %d " %  n
+#        print "row count %d " %  n
         return n
     def getColumnClass(self, columnIndex):
         return basestring
@@ -103,20 +103,17 @@ def DisplayTable (collection):
             )
         )
     tm= ObjectTableModel(collection,columns)
-
     frame = JFrame("Street Table")
-    frame.setSize(400, 150)
+    frame.setSize(800, 1200)
     frame.setLayout(BorderLayout())
     table = JTable(tm)
+    table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS)
     scrollPane = JScrollPane()
-    scrollPane.setPreferredSize(Dimension(300,100))
     scrollPane.getViewport().setView((table))
-    panel = JPanel()
-    panel.add(scrollPane)
-    frame.add(panel, BorderLayout.CENTER)
-    frame.setVisible(True)
-
-
+    frame.add(scrollPane)
+    frame.pack();
+    frame.setSize(frame.getPreferredSize());
+    frame.show()
 
 
 def isBuilding(p):
@@ -140,8 +137,8 @@ class BuildingInBuilding :
 
     def visitn(self,n) :
 
-        print "visitn:"
-        print n
+#        print "visitn:"
+#        print n
 
         if (n.isUsable() and isBuilding(n)) :
             if not self.primitivesToCheck.contains(n):
@@ -149,11 +146,11 @@ class BuildingInBuilding :
                 self.primitivesToCheck.add(n);
             else:
                 print "duplicate p :" 
-                print n
+#                print n
 
     def visitw(self,w) :
         print "visitw:"
-        print w
+#        print w
 
         if (w.isUsable() and w.isClosed() and isBuilding(w)) :
             self.primitivesToCheck.add(w)
@@ -176,8 +173,9 @@ class BuildingInBuilding :
         return l1.equals(l2);
     
     def evaluateNode(self,p,obj):
-        print p
-        print obj
+        print "te"
+#        print p
+#        print obj
 
     def endTest2(self):
         for p in self.primitivesToCheck :
@@ -201,12 +199,8 @@ class BuildingInBuilding :
         bbox =  BBox(-1000,-900,1800,900)
         print self.index
         collection = self.index.search(bbox)
-        print collection
-        DisplayTable(collection)
-
-                
-
-
+#        print collection
+        DisplayTable(self.primitivesToCheck)
                 
 def main():
     b=BuildingInBuilding()
