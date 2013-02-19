@@ -23,6 +23,27 @@ import org.openstreetmap.josm.data.osm.TagCollection as TagCollection
 import org.openstreetmap.josm.data.osm.Way as Way
 import time
 
+from org.openstreetmap.josm.tools.I18n.tr import *
+import java.awt.Component
+
+import java.io.File as File;
+import java.io.FileInputStream as FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Collection;
+import org.openstreetmap.josm.data.Preferences as Preferences;
+#import org.openstreetmap.josm.data.osm.OsmPrimitive as OsmPrimitive;
+import org.openstreetmap.josm.data.projection.Projection;
+import org.openstreetmap.josm.Main as Main;
+#import org.openstreetmap.josm.gui.layer.OsmDataLayer;
+import org.openstreetmap.josm.gui.progress.NullProgressMonitor as NullProgressMonitor;
+import org.openstreetmap.josm.gui.progress.ProgressMonitor;
+import org.openstreetmap.josm.io.IllegalDataException;
+import org.openstreetmap.josm.io.OsmImporter as OsmImporter;
+import org.openstreetmap.josm.io.OsmImporter.OsmImporterData;
+import org.openstreetmap.josm.gui.preferences.projection.ProjectionChoice;
+import org.openstreetmap.josm.gui.preferences.projection.ProjectionPreference as ProjectionPreference;
+
 class ObjectTableModel(AbstractTableModel):
     __columns__ = ()
     def __init__(self, delegate, columns):
@@ -112,8 +133,8 @@ def DisplayTable (collection):
     table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS)
 
     header = table.getTableHeader()
-    header.setUpdateTableInRealTime(true)
-    header.setReorderingAllowed(true);
+    header.setUpdateTableInRealTime(True)
+    header.setReorderingAllowed(True);
 
 #    header.addMouseListener(collection.ColumnListener(table));
 
@@ -210,41 +231,36 @@ class BuildingInBuilding :
         print self.index
         collection = self.index.search(bbox)
 #        print collection
-        DisplayTable(self.primitivesToCheck)
                 
-def main():
-    b=BuildingInBuilding()
 
-    if Main.main and Main.main.map:
-        mv= Main.main.map.mapView
-        print mv.editLayer
-
-        if mv.editLayer and mv.editLayer.data :
-            selectedNodes = mv.editLayer.data.getSelectedNodes()
-            selectedWays = mv.editLayer.data.getSelectedWays()
-            if not(selectedWays):
-                JOptionPane.showMessageDialog(Main.parent, "Please select a set of ways")
-            else:
-                print "going to output ways";
-                for way in selectedWays:
-                    #is there a 
-                    housenumber=way.get('addr:housenumber')
-                    street=way.get('addr:street')
-                    if(housenumber):
-                         b.visitw(way)
-        #                print 'house box:', street, housenumber
-
-                for node in selectedNodes:
-                    housenumber=node.get('addr:housenumber')
-                    street=node.get('addr:street')
-                    if(housenumber):
-                         b.visitn(node)
-#                         l.showNode(node)
-        #                print 'house box:', street, housenumber
-        
-
-        b.endTest()
+def projection() :
+    print "projection"
+    pc = ProjectionPreference.mercator
+    id = pc.getId()
+    pref = None
+    Main.pref.putCollection("projection.sub."+id, pref)
+    pc.setPreferences(pref)
+    proj = pc.getProjection()
+    Main.setProjection(proj)
+		
+def prefs() :
+    print "prefs"
+    Main.pref =  Preferences()
+    Main.pref.put("tags.reversed_direction", "false")
+	
+def main ():
+    print "main"
+    prefs();
+    projection();
+    importer =  OsmImporter()
+    fileObj=  File('/home/mdupont/experiments/josm/topeka/noto.osm')
+    inobj = FileInputStream(fileObj);
+    data = importer.loadLayer(inobj, fileObj, fileObj.getName(), NullProgressMonitor.INSTANCE)
+    s = data.toString();
+#    print s
+    primitives = data.getLayer().data.allPrimitives();
+#    print primitives
+    DisplayTable(primitives.toArray())
 
 
-
-main()
+main();
