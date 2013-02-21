@@ -9,6 +9,9 @@ from javax.swing.table import AbstractTableModel
 from javax.swing.table import DefaultTableModel
 from org.openstreetmap.josm import Main
 from org.openstreetmap.josm.data import Preferences;
+
+Main.pref =  Preferences()
+
 from org.openstreetmap.josm.data.osm import *;
 from org.openstreetmap.josm.data.validation import *;
 from org.openstreetmap.josm.tools import *;
@@ -22,20 +25,18 @@ import org.openstreetmap.josm.data.osm.Node as Node
 import org.openstreetmap.josm.data.osm.TagCollection as TagCollection
 import org.openstreetmap.josm.data.osm.Way as Way
 import time
-
 from org.openstreetmap.josm.tools.I18n.tr import *
 import java.awt.Component
-
 import java.io.File as File;
 import java.io.FileInputStream as FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import org.openstreetmap.josm.data.Preferences as Preferences;
-#import org.openstreetmap.josm.data.osm.OsmPrimitive as OsmPrimitive;
+import org.openstreetmap.josm.data.osm.OsmPrimitive as OsmPrimitive;
 import org.openstreetmap.josm.data.projection.Projection;
 import org.openstreetmap.josm.Main as Main;
-#import org.openstreetmap.josm.gui.layer.OsmDataLayer;
+import org.openstreetmap.josm.gui.layer.OsmDataLayer;
 import org.openstreetmap.josm.gui.progress.NullProgressMonitor as NullProgressMonitor;
 import org.openstreetmap.josm.gui.progress.ProgressMonitor;
 import org.openstreetmap.josm.io.IllegalDataException;
@@ -43,6 +44,7 @@ import org.openstreetmap.josm.io.OsmImporter as OsmImporter;
 import org.openstreetmap.josm.io.OsmImporter.OsmImporterData;
 import org.openstreetmap.josm.gui.preferences.projection.ProjectionChoice;
 import org.openstreetmap.josm.gui.preferences.projection.ProjectionPreference as ProjectionPreference;
+from sets import Set
 
 class ObjectTableModel(AbstractTableModel):
     __columns__ = ()
@@ -247,6 +249,28 @@ def prefs() :
     print "prefs"
     Main.pref =  Preferences()
     Main.pref.put("tags.reversed_direction", "false")
+
+
+
+def streetlist(objs) :
+    objs2 = []
+    streets = Set()
+
+    for p in objs:
+        if (isinstance(p,Way)):
+            s=p.get('addr:street')
+            if (s):
+                if not s in streets :
+                    print "%s is new" % s
+                    streets.add(s)
+                    objs2.append(p)
+#                else:
+#                    print "%s is duplicate" % s
+#    objs3=objs2.sort(lambda a, b: cmp(len(a), len(b)))
+#    objs3= objs2.sort(lambda x: x.get('addr:street') )  
+      
+    DisplayTable(objs2)
+
 	
 def main ():
     print "main"
@@ -260,7 +284,9 @@ def main ():
 #    print s
     primitives = data.getLayer().data.allPrimitives();
 #    print primitives
-    DisplayTable(primitives.toArray())
-
+    objs= primitives.toArray()
+    #DisplayTable(obj)
+    streetlist(objs)
+# make a list of the street objects
 
 main();
