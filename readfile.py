@@ -44,7 +44,7 @@ import org.openstreetmap.josm.io.OsmImporter as OsmImporter;
 import org.openstreetmap.josm.io.OsmImporter.OsmImporterData;
 import org.openstreetmap.josm.gui.preferences.projection.ProjectionChoice;
 import org.openstreetmap.josm.gui.preferences.projection.ProjectionPreference as ProjectionPreference;
-from sets import Set
+
 
 class ObjectTableModel(AbstractTableModel):
     __columns__ = ()
@@ -119,6 +119,14 @@ class ObjectTableModel(AbstractTableModel):
         return visible
 
 #def EventListener():
+
+class MyFrame (JFrame) :
+    def __init__(self,name):
+        super(MyFrame, self).__init__(name)
+
+    def LookupEvent(self, event) :
+        print self
+        print event
     
 def DisplayTable (collection):
     columns=list(
@@ -128,7 +136,7 @@ def DisplayTable (collection):
             )
         )
     tm= ObjectTableModel(collection,columns)
-    frame = JFrame("Street Table")
+    frame = MyFrame("street")
     frame.setSize(800, 1200)
     frame.setLayout(BorderLayout())
     table = JTable(tm)
@@ -144,6 +152,15 @@ def DisplayTable (collection):
     frame.show()
 
 
+from java.awt.event import KeyEvent
+from javax.swing import ImageIcon
+from javax.swing import JMenu
+from javax.swing import JMenuBar
+from javax.swing import JMenuItem
+
+
+
+
 def DisplayStreetTable (collection):
     columns=list(
         (
@@ -151,7 +168,7 @@ def DisplayStreetTable (collection):
             )
         )
     tm= ObjectTableModel(collection,columns)
-    frame = JFrame("Street Table")
+    frame = MyFrame("Street Table")
     frame.setSize(800, 1200)
     frame.setLayout(BorderLayout())
     table = JTable(tm)
@@ -161,7 +178,28 @@ def DisplayStreetTable (collection):
     header.setReorderingAllowed(True);
     scrollPane = JScrollPane()
     scrollPane.getViewport().setView((table))
+#    copyButton = JButton('Merge') #,actionPerformed=self.noAction
+#    frame.add(copyButton)
+
+    menubar = JMenuBar()
+    file = JMenu("Edit")
+    file.setMnemonic(KeyEvent.VK_E)
+
+    lookup = JMenuItem("Lookup",actionPerformed=frame.LookupEvent)
+    lookup.setMnemonic(KeyEvent.VK_L)
+
+    file.add(lookup)
+
+
+    menubar.add(file)
+
+
+
+    frame.setJMenuBar(menubar)
+
     frame.add(scrollPane)
+
+
     frame.pack();
     frame.setSize(frame.getPreferredSize());
     frame.show()
