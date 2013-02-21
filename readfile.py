@@ -133,14 +133,32 @@ def DisplayTable (collection):
     frame.setLayout(BorderLayout())
     table = JTable(tm)
     table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS)
-
     header = table.getTableHeader()
     header.setUpdateTableInRealTime(True)
     header.setReorderingAllowed(True);
+    scrollPane = JScrollPane()
+    scrollPane.getViewport().setView((table))
+    frame.add(scrollPane)
+    frame.pack();
+    frame.setSize(frame.getPreferredSize());
+    frame.show()
 
-#    header.addMouseListener(collection.ColumnListener(table));
 
-
+def DisplayStreetTable (collection):
+    columns=list(
+        (
+            ("Name","name"),
+            )
+        )
+    tm= ObjectTableModel(collection,columns)
+    frame = JFrame("Street Table")
+    frame.setSize(800, 1200)
+    frame.setLayout(BorderLayout())
+    table = JTable(tm)
+    table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS)
+    header = table.getTableHeader()
+    header.setUpdateTableInRealTime(True)
+    header.setReorderingAllowed(True);
     scrollPane = JScrollPane()
     scrollPane.getViewport().setView((table))
     frame.add(scrollPane)
@@ -163,16 +181,12 @@ class BuildingInBuilding :
     def __init__ (self):
         self.primitivesToCheck = LinkedList();
         self.index = QuadBuckets();
-
         print 'building in building'
         #super(tr("Building inside building"), tr("Checks for building areas inside of buildings."));
-    
-
+  
     def visitn(self,n) :
-
 #        print "visitn:"
 #        print n
-
         if (n.isUsable() and isBuilding(n)) :
             if not self.primitivesToCheck.contains(n):
 #                print "adding  :"  n 
@@ -184,7 +198,6 @@ class BuildingInBuilding :
     def visitw(self,w) :
         print "visitw:"
 #        print w
-
         if (w.isUsable() and w.isClosed() and isBuilding(w)) :
             self.primitivesToCheck.add(w)
             self.index.add(w)
@@ -198,7 +211,6 @@ class BuildingInBuilding :
             l1 = w1.get("layer") 
         else :
             l1 = "0";
-
         if  w2.get("layer") is not None :
             l2 = w2.get("layer") 
         else : 
@@ -213,7 +225,6 @@ class BuildingInBuilding :
     def endTest2(self):
         for p in self.primitivesToCheck :
             collection = self.index.search(p.getBBox())
-
             for object in collection:
                 if (not p.equals(object)):              
                     if (isinstance(p,Node)):
@@ -250,25 +261,59 @@ def prefs() :
     Main.pref =  Preferences()
     Main.pref.put("tags.reversed_direction", "false")
 
+class JythonWay():
+    def __init__(self,x):
+        self.way=x
+        self.subobjects=[]
+        pass
+
+# todo:
+    def lookup(self) :
+        # lookup this street name on the internet
+        print "ToDO"
+
+# todo:
+    def merge(self) :
+        # merge these two streets, fix the names
+        print "ToDO fix the streets"
+
+    def get (self,k):
+        return self.way.get(k)
+
+    def name(self):
+        return self.way.get('name')
+
+    def addsubobject(self, other):
+        return self.subobjects.append(other)
+
+import re
+pattern = re.compile(r'\s+')
+
 
 
 def streetlist(objs) :
     objs2 = []
-    streets = Set()
-
+    streets = {}
     for p in objs:
-        if (isinstance(p,Way)):
-            s=p.get('addr:street')
-            if (s):
-                if not s in streets :
-                    print "%s is new" % s
-                    streets.add(s)
-                    objs2.append(p)
-#                else:
-#                    print "%s is duplicate" % s
-#    objs3=objs2.sort(lambda a, b: cmp(len(a), len(b)))
-    objs3= sorted(objs2,(lambda x, y: (cmp(x.get('addr:street'), y.get('addr:street'))))) 
-    DisplayTable(objs3)
+        if (not isinstance(p,Way)):
+            continue
+        s=p.get('name')
+        hw=p.get('highway')        
+        if (s is  None):
+            continue        
+        if (hw is  None):
+            continue        
+
+        s = s.lower()
+        s=re.sub(pattern, '', s) #remove whitespace       
+        if not s in streets :
+            print "%s is new" % s
+            streets[s]=JythonWay(p)
+        else :
+            streets[s].addsubobject(p)
+#            print streets.values()
+    objs3= sorted(streets.values(),(lambda x, y: (cmp(x.name(), y.name())))) 
+    DisplayStreetTable(objs3)
 
 	
 def main ():
