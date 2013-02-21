@@ -267,9 +267,8 @@ def streetlist(objs) :
 #                else:
 #                    print "%s is duplicate" % s
 #    objs3=objs2.sort(lambda a, b: cmp(len(a), len(b)))
-#    objs3= objs2.sort(lambda x: x.get('addr:street') )  
-      
-    DisplayTable(objs2)
+    objs3= sorted(objs2,(lambda x, y: (cmp(x.get('addr:street'), y.get('addr:street'))))) 
+    DisplayTable(objs3)
 
 	
 def main ():

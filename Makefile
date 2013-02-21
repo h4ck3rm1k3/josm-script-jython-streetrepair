@@ -1,5 +1,4 @@
 
-
 testjythonimport:
 	CLASSPATH=/home/mdupont/experiments/josm/dist/josm-custom.jar /home/mdupont/experiments/jython/jython/jython/dist/bin/jython ./readfile.py	
 
