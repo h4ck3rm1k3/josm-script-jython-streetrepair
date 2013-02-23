@@ -45,6 +45,14 @@ import org.openstreetmap.josm.io.OsmImporter.OsmImporterData;
 import org.openstreetmap.josm.gui.preferences.projection.ProjectionChoice;
 import org.openstreetmap.josm.gui.preferences.projection.ProjectionPreference as ProjectionPreference;
 
+from java.awt.event import KeyEvent
+from javax.swing import ImageIcon
+from javax.swing import JMenu
+from javax.swing import JMenuBar
+from javax.swing import JMenuItem
+
+from java.awt.event import MouseListener
+from java.awt.event import KeyListener
 
 class ObjectTableModel(AbstractTableModel):
     __columns__ = ()
@@ -85,6 +93,7 @@ class ObjectTableModel(AbstractTableModel):
         self._getters[index] = lambda row: row.get(column[2])
         return column
     def getValueAt(self, rowIndex, columnIndex):
+        print "getValueAt " + str(rowIndex) + ":"+ str(columnIndex)
         #line = self.delegate[rowIndex]
         return self.delegate[rowIndex].get(self.__columns__[columnIndex][1])
         #return self._getters[columnIndex](line)
@@ -120,9 +129,54 @@ class ObjectTableModel(AbstractTableModel):
 
 #def EventListener():
 
-class MyFrame (JFrame) :
+class MyListener (MouseListener,KeyListener ) :
+
+    def __init__(self, table):
+        self.table=table
+
+#    def mouseReleased(self, e):
+#        print("Mouse released; # of clicks: "  + str(e.getClickCount()))
+#        print("button: "  + str(e.getButton()))
+
+    def keyPressed( self,e) :
+        print("key pressed;  "  + str(e.getKeyChar()))
+
+#        print self.table
+#        r = self.table.getSelectedRow ()
+#        print r 
+
+        rs=	self.table.getSelectedRows() 
+
+
+        if (e.getKeyChar() == 'l') :
+            print("lookup;  ")
+            for r in rs :
+                print r
+                obj=self.table.getValueAt(r,0)
+                print obj
+            #d = LookupDialog()
+
+#    def mouseReleased(self,e) :
+#        print("Mouse released; # of clicks: "  + str(e.getClickCount()))
+
+    def mouseClicked(self, e):
+        #        print("Mouse clicked; # of clicks: "  + str(e.getClickCount()))
+        #       print("button: "  + str(e.getButton()))
+        if (e.getButton() ==3) :
+            print "Mouse3 clicked; # of clicks: "  + str(e.getClickCount())
+        else :
+            if (e.getButton() ==2):
+                print "Mouse2 clicked; # of clicks: "  + str(e.getClickCount())
+            else:
+                if (e.getButton() ==1):
+                    print "Mouse1 clicked; # of clicks: "  + str(e.getClickCount())
+
+
+
+class MyFrame (JFrame ) :
     def __init__(self,name):
         super(MyFrame, self).__init__(name)
+
 
     def LookupEvent(self, event) :
         print self
@@ -152,12 +206,6 @@ def DisplayTable (collection):
     frame.show()
 
 
-from java.awt.event import KeyEvent
-from javax.swing import ImageIcon
-from javax.swing import JMenu
-from javax.swing import JMenuBar
-from javax.swing import JMenuItem
-
 
 
 
@@ -180,6 +228,10 @@ def DisplayStreetTable (collection):
     scrollPane.getViewport().setView((table))
 #    copyButton = JButton('Merge') #,actionPerformed=self.noAction
 #    frame.add(copyButton)
+
+    listener=MyListener(table)
+    table.addMouseListener(listener)
+    table.addKeyListener(listener)
 
     menubar = JMenuBar()
     file = JMenu("Edit")
@@ -345,7 +397,7 @@ def streetlist(objs) :
         s = s.lower()
         s=re.sub(pattern, '', s) #remove whitespace       
         if not s in streets :
-            print "%s is new" % s
+#            print "%s is new" % s
             streets[s]=JythonWay(p)
         else :
             streets[s].addsubobject(p)
@@ -360,6 +412,7 @@ def main ():
     projection();
     importer =  OsmImporter()
     fileObj=  File('/home/mdupont/experiments/josm/topeka/noto.osm')
+#    fileObj=  File('/home/mdupont/experiments/josm/topeka/topeka.osm')
     inobj = FileInputStream(fileObj);
     data = importer.loadLayer(inobj, fileObj, fileObj.getName(), NullProgressMonitor.INSTANCE)
     s = data.toString();
